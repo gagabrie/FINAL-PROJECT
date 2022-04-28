@@ -1,3 +1,11 @@
 4/27/2022
 starting of project
 Copied the template from D2L.
+
+
+4/27/2022
+Following the lab recording.
+https://stackoverflow.com/questions/24126596/print-md5-hash-of-an-image-opened-with-pythons-pil
+
+4/27/2022
+Geting help from lab 9 solved scripts

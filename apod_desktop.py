@@ -16,11 +16,14 @@ History:
   Date        Author    Description
   2022-03-11  J.Dalby   Initial creation
 """
+import ctypes
 from sys import argv, exit
 from datetime import datetime, date
 from hashlib import sha256
 from os import path
-
+import requests
+import hashlib
+import os
 def main():
 
     # Determine the paths where files are stored
@@ -37,15 +40,15 @@ def main():
     apod_info_dict = get_apod_info(apod_date)
     
     # Download today's APOD
-    image_url = "TODO"
-    image_msg = download_apod_image(image_url)
-    image_sha256 = "TODO"
-    image_size = -1 # TODO
+
+    image_url = apod_info_dict["url"]
+    image_msg =  download_apod_image(image_url)
+    image_sha256 = hashlib.sha256(image_msg.content)
+    image_size = len(image_msg.content)
     image_path = get_image_path(image_url, image_dir_path)
 
     # Print APOD image information
     print_apod_info(image_url, image_path, image_size, image_sha256)
-
     # Add image to cache if not already present
     if not image_already_in_db(db_path, image_sha256):
         save_image_file(image_msg, image_path)
@@ -106,19 +109,29 @@ def get_image_path(image_url, dir_path):
     :param dir_path: Path of directory in which image is saved locally
     :returns: Path at which image is saved locally
     """
-    return "TODO"
+    path  = dir_path+ image_url
+    
+    return path
 
 def get_apod_info(date):
-    """
-    Gets information from the NASA API for the Astronomy 
-    Picture of the Day (APOD) from a specified date.
 
-    :param date: APOD date formatted as YYYY-MM-DD
-    :returns: Dictionary of APOD info
-    """    
-    return {"todo" : "TODO"}
+    
+    param = {
+        'api_key' : "SIdDTFyib85W4RD2fMlO7AxP2CCGW06GJOBqQLlk",
+        'date' : date
+    }
+    image_url = "https://api.nasa.gov/planetary/apod"
+    response = requests.get(image_url,params=param)
+    response = response.json()
+    return response
 
 def print_apod_info(image_url, image_path, image_size, image_sha256):
+
+    print("URL: ", image_url)
+    print("File Path:", image_path)
+    print("File Size:", image_size)
+    print("SHA-256:",image_sha256.hexdigest())
+   
     """
     Prints information about the APOD
 
@@ -128,18 +141,33 @@ def print_apod_info(image_url, image_path, image_size, image_sha256):
     :param image_sha256: SHA-256 of image
     :returns: None
     """    
-    return #TODO
+    return None
 
 def download_apod_image(image_url):
+   
+   
+    
+    print(image_url)
+    response = requests.get(image_url)
+    
+    
     """
     Downloads an image from a specified URL.
 
     :param image_url: URL of image
     :returns: Response message that contains image data
     """
-    return "TODO"
+    return response
 
 def save_image_file(image_msg, image_path):
+
+    with open(image_path, 'wb') as file: #with used for calling two functions together
+            file.write(image_msg.content)    #assigning the file handle to file
+    print('success')    
+
+
+
+
     """
     Extracts an image file from an HTTP response message
     and saves the image file to disk.
@@ -189,6 +217,8 @@ def set_desktop_background_image(image_path):
     :param image_path: Path of image file
     :returns: None
     """
-    return #TODO
+    ctypes.windll.user32.SystemParametersInfoW(20, 0, image_path, 0) 
+    
+    return None
 
 main()
