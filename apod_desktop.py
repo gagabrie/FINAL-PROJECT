@@ -21,12 +21,15 @@ from sys import argv, exit
 from datetime import datetime, date
 from hashlib import sha256
 from os import path
+from unittest import result
 import requests
 import hashlib
 import os
+import sqlite3
 def main():
 
     # Determine the paths where files are stored
+    #done with the project
     image_dir_path = get_image_dir_path()
     db_path = path.join(image_dir_path, 'apod_images.db')
 
@@ -109,7 +112,7 @@ def get_image_path(image_url, dir_path):
     :param dir_path: Path of directory in which image is saved locally
     :returns: Path at which image is saved locally
     """
-    path  = dir_path+ image_url
+    path  = dir_path+"\\"+image_url.split("/")[-1]
     
     return path
 
@@ -144,8 +147,7 @@ def print_apod_info(image_url, image_path, image_size, image_sha256):
     return None
 
 def download_apod_image(image_url):
-   
-   
+      
     
     print(image_url)
     response = requests.get(image_url)
@@ -160,14 +162,6 @@ def download_apod_image(image_url):
     return response
 
 def save_image_file(image_msg, image_path):
-
-    with open(image_path, 'wb') as file: #with used for calling two functions together
-            file.write(image_msg.content)    #assigning the file handle to file
-    print('success')    
-
-
-
-
     """
     Extracts an image file from an HTTP response message
     and saves the image file to disk.
@@ -176,7 +170,11 @@ def save_image_file(image_msg, image_path):
     :param image_path: Path to save image file
     :returns: None
     """
-    return #TODO
+
+    with open(image_path, 'wb') as file: 
+            file.write(image_msg.content)    
+    print('success')    
+    return None
 
 def create_image_db(db_path):
     """
@@ -185,7 +183,23 @@ def create_image_db(db_path):
     :param db_path: Path of .db file
     :returns: None
     """
-    return #TODO
+    myConnection = sqlite3.connect(db_path)
+    myCursor = myConnection.cursor()
+    createDB = """ CREATE TABLE IF NOT EXISTS apod_info (
+                          path text NOT NULL,
+                          sha256 text PRIMARY KEY NOT NULL,
+                          size double NOT NULL
+                        );"""
+
+    myCursor.execute(createDB)
+    myConnection.commit()
+    myConnection.close()  
+
+    return None                     
+
+  
+
+    
 
 def add_image_to_db(db_path, image_path, image_size, image_sha256):
     """
@@ -197,18 +211,45 @@ def add_image_to_db(db_path, image_path, image_size, image_sha256):
     :param image_sha256: SHA-256 of image
     :returns: None
     """
-    return #TODO
+    myConnection = sqlite3.connect(db_path)
+    myCursor = myConnection.cursor()
+    Query = """INSERT INTO apod_info (  
+                      path, 
+                      sha256, 
+                      size
+                      )
+                  VALUES (?, ?, ?);"""
+
+
+
+    InsertQuery = (image_path,image_sha256.hexdigest(),image_size)
+    myConnection.execute(Query,InsertQuery)
+    myConnection.commit()
+    myConnection.close()  
+
+    return None
 
 def image_already_in_db(db_path, image_sha256):
-    """
-    Determines whether the image in a response message is already present
-    in the DB by comparing its SHA-256 to those in the DB.
+    myConnection = sqlite3.connect(db_path)
+    myCursor = myConnection.cursor()
+    query = """select sha256 from apod_info where sha256= ?;"""
+    myCursor.execute(query,(image_sha256.hexdigest(),))
+    result = myCursor.fetchall()
+    if len(result) == 0:
+        return False
+    else:
+        return True 
+#    """
+#    Determines whether the image in a response message is already present
+#    in the DB by comparing its SHA-256 to those in the DB.
+#
+#   :param db_path: Path of .db file
+#   :param image_sha256: SHA-256 of image
+#  :returns: True if image is already in DB; False otherwise
+#    """ 
 
-    :param db_path: Path of .db file
-    :param image_sha256: SHA-256 of image
-    :returns: True if image is already in DB; False otherwise
-    """ 
-    return True #TODO
+
+    return True 
 
 def set_desktop_background_image(image_path):
     """

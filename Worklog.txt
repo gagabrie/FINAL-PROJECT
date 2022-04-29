@@ -9,3 +9,13 @@ https://stackoverflow.com/questions/24126596/print-md5-hash-of-an-image-opened-w
 
 4/27/2022
 Geting help from lab 9 solved scripts
+
+
+4/28/2022
+figuring to get the image on desktop and creating the database
+learned from lecture to make db
+
+4/29/2022
+https://docs.python.org/3/library/stdtypes.html
+finalizing the project
+Done with the project
